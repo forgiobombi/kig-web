@@ -52,7 +52,7 @@ impl DbHandle {
         let filter = Some(doc! {"game_id": Self::bytes(id)});
         let res: Option<Result<(GameLog, GameLogMeta)>> = self
             .client
-            .collection(&format!("gamelogs_{}", game))
+            .collection::<mongodb::bson::Document>(&format!("gamelogs_{}", game))
             .find_one(filter, None)
             .await?
             .map(|doc| {
