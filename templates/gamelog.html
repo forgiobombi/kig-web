@@ -20,13 +20,16 @@
 {% block content %}
 {% let map = functions.get_map(log) %}
 {% let duration = log.game_end() - log.game_start() %}
-<div class="row mb-2">
-    <h1 class="text-center display-5"><strong>{{ mode.get_full_name() }} </strong> Game <small>{{ game_id }}</small>
-    </h1>
+<div class="row mb-3">
+    <div class="col">
+        <h1 class="text-center display-5 mb-0"><strong>{{ mode.get_full_name() }} </strong> Game <small>{{ game_id
+                }}</small>
+        </h1>
+    </div>
 </div>
-<div class="row">
-    <div class="col-3">
-        <div class="card w-100 h-100 mb-3">
+<div class="row g-3 align-items-stretch">
+    <div class="col-12 col-lg-4 col-xl-3">
+        <div class="card w-100 h-100">
             <img src="/game-img/maps/{{ mode.get_database_id() }}/{{ map|map_file_name }}.png" class="card-img-top"
                 alt="Map thumbnail">
             <div class="card-body">
@@ -41,10 +44,10 @@
             </div>
         </div>
     </div>
-    <div class="col-8 border rounded d-flex flex-column justify-content-center">
-        <div class="row">
-            <div class="col">
-                <h2 class="display-6 text-center"><strong>Winner:</strong>
+    <div class="col-12 col-lg-8 col-xl-9">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <h2 class="display-6 text-center mb-3"><strong>Winner:</strong>
                     {% let winner = winner.as_ref() %}
                     {% if winner.is_some() %}
                     {% let team = winner.unwrap() %}
@@ -53,31 +56,29 @@
                     Tie
                     {% endif %}
                 </h2>
-            </div>
-        </div>
-        <div class="row mt-2">
-            <div class="col text-center">
-                <span class="text-outline gray"><i class="align-middle ri-server-fill"></i>
-                    <span class="align-middle">{{ server.as_deref().unwrap_or("Unknown") }}</span>
-                </span>&nbsp;
-                <span class="text-outline gold"><i class="align-middle ri-parent-fill"></i>
-                    <span class="align-middle">{{ total_players }}</span>
-                </span>&nbsp;
-                <span class="text-outline blue"><i class="align-middle ri-calendar-event-fill"></i>
-                    <span class="align-middle"></span>
-                    <script
-                        type="text/javascript">document.write(new Date({{ log.game_start() }}).toLocaleString())</script>
-                    <small>(Your time)</small>
-                </span>&nbsp;
-                <span class="text-outline darkgreen"><i class="align-middle ri-timer-line"></i>
-                    <span class="align-middle">{{ duration|format_duration }}</span>
-                </span>
+                <div class="d-flex justify-content-center flex-wrap gap-2">
+                    <span class="text-outline gray"><i class="align-middle ri-server-fill"></i>
+                        <span class="align-middle">{{ server.as_deref().unwrap_or("Unknown") }}</span>
+                    </span>
+                    <span class="text-outline gold"><i class="align-middle ri-parent-fill"></i>
+                        <span class="align-middle">{{ total_players }}</span>
+                    </span>
+                    <span class="text-outline blue"><i class="align-middle ri-calendar-event-fill"></i>
+                        <span class="align-middle"></span>
+                        <script
+                            type="text/javascript">document.write(new Date({{ log.game_start() }}).toLocaleString())</script>
+                        <small>(Your time)</small>
+                    </span>
+                    <span class="text-outline darkgreen"><i class="align-middle ri-timer-line"></i>
+                        <span class="align-middle">{{ duration|format_duration }}</span>
+                    </span>
+                </div>
             </div>
         </div>
     </div>
 </div>
-<div class="row mt-3">
-    <div class="col-3">
+<div class="row g-3 mt-1">
+    <div class="col-12 col-lg-4 col-xl-3">
         <div class="accordion" id="teams" style="border: none;">
             {% for team in teams %}
             <div class="accordion-item border rounded mb-2">
@@ -99,24 +100,27 @@
                         <ul class="list-group">
                             {% for player in team.players %}
                             <li class="list-group-item">
-                                <div class="row">
-                                    <div class="col-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="flex-shrink-0">
                                         {% if player.nick.is_some() && nicks_hidden %}
-                                            <img alt="Skin" src="https://crafthead.net/avatar/c06f89064c8a49119c29ea1dbd1aab82" height="32">
+                                        <img alt="Skin" class="rounded" src="https://crafthead.net/avatar/c06f89064c8a49119c29ea1dbd1aab82"
+                                            height="32" width="32">
                                         {% else %}
-                                            <img alt="Skin" src="https://crafthead.net/helm/{{"{}"|format(player.uuid)}}" height="32">
+                                        <img alt="Skin" class="rounded"
+                                            src="https://crafthead.net/helm/{{"{}"|format(player.uuid)}}" height="32"
+                                            width="32">
                                         {% endif %}
                                     </div>
-                                    <div class="col">
+                                    <div class="flex-grow-1">
                                         {% if player.nick.is_some() && nicks_hidden %}
-                                            <span class="align-middle">{{ player.nick.unwrap() }} <small>(<i>nick</i>)</small></span>
+                                        <span class="align-middle">{{ player.nick.unwrap() }} <small>(<i>nick</i>)</small></span>
                                         {% else %}
-                                            <span class="align-middle">
-                                                {{ player.name }}
-                                                {% if player.nick.is_some() && !nicks_hidden %}
-                                                    <small>({{ player.nick.unwrap() }})</small>
-                                                {% endif %}
-                                            </span>
+                                        <span class="align-middle">
+                                            {{ player.name }}
+                                            {% if player.nick.is_some() && !nicks_hidden %}
+                                            <small>({{ player.nick.unwrap() }})</small>
+                                            {% endif %}
+                                        </span>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -129,31 +133,30 @@
             {% endfor %}
         </div>
     </div>
-    <div class="col-8 border rounded">
-        <div class="row mt-3">
-            <div class="col">
-                <p class="lead">Game events</p>
-            </div>
-            <div class="col">
-                <div class="btn-group float-end" role="group" aria-label="Display controls">
-                    <input type="radio" class="btn-check" name="events-ctrl" id="allevents" autocomplete="off" checked>
-                    <label class="btn btn-outline-primary" for="allevents">All events</label>
+    <div class="col-12 col-lg-8 col-xl-9">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-3">
+                    <p class="lead mb-0">Game events</p>
+                    <div class="ms-md-auto">
+                        <div class="btn-group flex-wrap" role="group" aria-label="Display controls">
+                            <input type="radio" class="btn-check" name="events-ctrl" id="allevents" autocomplete="off"
+                                checked>
+                            <label class="btn btn-outline-primary" for="allevents">All events</label>
 
-                    <input type="radio" class="btn-check" name="events-ctrl" id="gameonly" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="gameonly">Game only</label>
+                            <input type="radio" class="btn-check" name="events-ctrl" id="gameonly" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="gameonly">Game only</label>
 
-                    <input type="radio" class="btn-check" name="events-ctrl" id="chatonly" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="chatonly">Chat only</label>
+                            <input type="radio" class="btn-check" name="events-ctrl" id="chatonly" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="chatonly">Chat only</label>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col">
                 <ul class="list-group" id="events">
                     {% for time_evt in events %}
                     <li class="list-group-item {% if time_evt.is_chat() %}log-chat-entry{% else %}log-entry{% endif %}
-                         d-flex justify-content-between align-items-center {{ functions.get_box_color(time_evt) }}">
-                        <span>
+                         d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 {{ functions.get_box_color(time_evt) }}">
+                        <div class="flex-grow-1">
                             {% let match_evt = time_evt.get_raw_event() %}
                             {% let evt_id = time_evt.get_id() %}
                             {% match match_evt %}
@@ -208,7 +211,7 @@
                             {% include "gamelogs/turf.html" %}
                             {% endmatch %}
                             {% endmatch %}
-                        </span>
+                        </div>
                         <span class="badge text-dark">{{ time_evt.get_time()|format_duration_i32 }}</span>
                     </li>
                     {% endfor %}

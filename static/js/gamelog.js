@@ -27,5 +27,5 @@ document.getElementById("chatonly").addEventListener('change', function () {
 })
 
 function setVisible(selector, visible) {
-    document.querySelectorAll(selector).forEach(e => e.setAttribute("style", `display: ${visible ? "inherit" : "none !important"}`))
+    document.querySelectorAll(selector).forEach(e => e.classList.toggle("d-none", !visible))
 }
