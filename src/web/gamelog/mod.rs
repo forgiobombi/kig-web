@@ -37,6 +37,7 @@ use time::UtcDateTime;
 mod bed;
 mod bp;
 mod cai;
+mod demo;
 mod event;
 mod grav;
 mod halloween;
@@ -195,99 +196,113 @@ pub async fn gamelog_by_id(
             mode.make_ascii_uppercase();
             let mode = GameMode::from_str(&mode).map_err(|_| crate::error::Error::ModeNotFound)?;
             let (log, meta) = get_log(state, mode, id.to_be_bytes()[2..].to_vec()).await?;
-            let teams: Vec<Team> = log
-                .teams
-                .iter()
-                .enumerate()
-                .map(|(i, t)| Team {
-                    name: t.name(),
-                    score: t.score(),
-                    color: get_team_color(t, i),
-                    players: t
-                        .players
-                        .iter()
-                        .map(|p| Player {
-                            name: p.name(),
-                            uuid: p.uuid().into(),
-                            nick: p.has_nick().then(|| p.nick()),
-                        })
-                        .collect(),
-                })
-                .collect();
-            let winner = log.has_winner().then(|| log.winner()).and_then(|winner| {
-                teams
-                    .iter()
-                    .find(|t| t.name == winner)
-                    .cloned()
-                    .or_else(|| {
-                        Some(Team {
-                            name: winner,
-                            color: "",
-                            score: 0,
-                            players: vec![],
-                        })
-                    })
-            });
-
-            let extension = mode.to_gamelog_ext(&log);
-            let extension_ptr = extension.clone().boxed();
-
-            let events: Vec<WrappedEvent> = log
-                .events
-                .iter()
-                .enumerate()
-                .map(|(i, e)| WrappedEvent::parse(i, e, &*extension_ptr))
-                .collect();
-
-            let player_teams = PlayerTeamMap::new(&teams, &events);
-            let player_display_names = teams
-                .iter()
-                .flat_map(|t| t.players.iter())
-                .map(|p| (p.name.to_string(), p.nick.unwrap_or(p.name).to_string()))
-                .collect();
-
-            let current_time = get_current_time();
-            let nicks_hidden = if log.has_nick_embargo()
-                && log.nick_embargo() > 0
-                && log.has_game_start()
-            {
-                UtcDateTime::from_unix_timestamp(log.game_start() / 1000).is_ok_and(|game_time| {
-                    game_time + time::Duration::seconds(log.nick_embargo().into()) > current_time
-                })
-            } else {
-                false
-            };
-
-            let render = GamelogTemplate {
-                log: &log,
-                total_players: if log.start_players() == 0 {
-                    log.teams.iter().map(|t| t.players.len()).sum()
-                } else {
-                    log.start_players() as usize
-                },
-                game_id: &path_id,
-                teams: teams.clone(),
-                events,
-                player_teams,
-                winner,
-                mode,
-                functions: Functions {
-                    extension: extension_ptr,
-                },
-                extension,
-                server: meta.server,
-                current_year: current_time.year().to_string(),
-                nicks_hidden,
-                player_display_names,
-            }
-            .render()
-            .unwrap();
-            Ok(HttpResponse::Ok()
-                .content_type(IntoHeaderValue::try_into(ContentType::html()).unwrap())
-                .body(render))
+            render_gamelog(mode, &path_id, &log, meta.server)
         }
         Err(_) => Ok(HttpResponse::BadRequest().body("Invalid game ID")),
     }
+}
+
+pub async fn demo_gamelog(web::Path(mut mode): web::Path<String>) -> Result<HttpResponse> {
+    mode.make_ascii_uppercase();
+    let mode = GameMode::from_str(&mode).map_err(|_| crate::error::Error::ModeNotFound)?;
+    let log = demo::build_demo_log(mode);
+    render_gamelog(mode, "DEMO", &log, Some(String::from("Demo server")))
+}
+
+fn render_gamelog(
+    mode: GameMode,
+    game_id: &str,
+    log: &GameLog,
+    server: Option<String>,
+) -> Result<HttpResponse> {
+    let teams: Vec<Team> = log
+        .teams
+        .iter()
+        .enumerate()
+        .map(|(i, t)| Team {
+            name: t.name(),
+            score: t.score(),
+            color: get_team_color(t, i),
+            players: t
+                .players
+                .iter()
+                .map(|p| Player {
+                    name: p.name(),
+                    uuid: p.uuid().into(),
+                    nick: p.has_nick().then(|| p.nick()),
+                })
+                .collect(),
+        })
+        .collect();
+    let winner = log.has_winner().then(|| log.winner()).and_then(|winner| {
+        teams
+            .iter()
+            .find(|t| t.name == winner)
+            .cloned()
+            .or_else(|| {
+                Some(Team {
+                    name: winner,
+                    color: "",
+                    score: 0,
+                    players: vec![],
+                })
+            })
+    });
+
+    let extension = mode.to_gamelog_ext(log);
+    let extension_ptr = extension.clone().boxed();
+
+    let events: Vec<WrappedEvent> = log
+        .events
+        .iter()
+        .enumerate()
+        .map(|(i, e)| WrappedEvent::parse(i, e, &*extension_ptr))
+        .collect();
+
+    let player_teams = PlayerTeamMap::new(&teams, &events);
+    let player_display_names = teams
+        .iter()
+        .flat_map(|t| t.players.iter())
+        .map(|p| (p.name.to_string(), p.nick.unwrap_or(p.name).to_string()))
+        .collect();
+
+    let current_time = get_current_time();
+    let nicks_hidden = if log.has_nick_embargo() && log.nick_embargo() > 0 && log.has_game_start()
+    {
+        UtcDateTime::from_unix_timestamp(log.game_start() / 1000).is_ok_and(|game_time| {
+            game_time + time::Duration::seconds(log.nick_embargo().into()) > current_time
+        })
+    } else {
+        false
+    };
+
+    let render = GamelogTemplate {
+        log,
+        total_players: if log.start_players() == 0 {
+            log.teams.iter().map(|t| t.players.len()).sum()
+        } else {
+            log.start_players() as usize
+        },
+        game_id,
+        teams: teams.clone(),
+        events,
+        player_teams,
+        winner,
+        mode,
+        functions: Functions {
+            extension: extension_ptr,
+        },
+        extension,
+        server,
+        current_year: current_time.year().to_string(),
+        nicks_hidden,
+        player_display_names,
+    }
+    .render()
+    .unwrap();
+    Ok(HttpResponse::Ok()
+        .content_type(IntoHeaderValue::try_into(ContentType::html()).unwrap())
+        .body(render))
 }
 
 impl Functions {

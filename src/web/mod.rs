@@ -22,7 +22,9 @@ use time::OffsetDateTime;
 mod gamelog;
 
 pub fn add_routes() -> Scope {
-    web::scope("/").route("/game/{mode}/{id}", web::get().to(gamelog::gamelog_by_id))
+    web::scope("/")
+        .route("/game/{mode}/{id}", web::get().to(gamelog::gamelog_by_id))
+        .route("/demo/{mode}", web::get().to(gamelog::demo_gamelog))
 }
 
 pub fn static_files() -> Files {
