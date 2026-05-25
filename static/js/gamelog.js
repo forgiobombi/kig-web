@@ -84,7 +84,7 @@ function setVisible(selector, visible) {
         brand.appendChild(el("span", "kig-player-popover-brand-text", "KIG Network"))
 
         const mode = el("div", "kig-player-popover-mode")
-        const info = modeInfo[modeId] || { label: modeId || "Game", icon: "ri-game-fill" }
+        const info = modeInfo[modeId] || { label: modeId || "Game", icon: "ri-gamepad-fill" }
         const icon = el("i", `kig-player-popover-mode-icon ${info.icon}`)
         mode.appendChild(icon)
         mode.appendChild(el("span", "kig-player-popover-mode-text", info.label))
@@ -164,7 +164,7 @@ function setVisible(selector, visible) {
         new bootstrap.Popover(node, {
             container: "body",
             trigger: "hover focus",
-            placement: "top",
+            placement: "auto",
             html: true,
             customClass: "kig-player-popover",
             title: () => buildTitle(modeId),

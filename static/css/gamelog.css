@@ -10,25 +10,39 @@
 
 .kig-player[data-kig-player] {
 	cursor: pointer;
+	padding: 1px 4px;
+	border-radius: 999px;
+	transition: background-color 140ms ease, box-shadow 140ms ease;
 }
 
 .kig-player[data-kig-player] .kig-player-name {
+	text-decoration: none;
+}
+
+.kig-player[data-kig-player]:hover {
+	background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme=dark] .kig-player[data-kig-player]:hover {
+	background: rgba(255, 255, 255, 0.06);
+}
+
+.kig-player[data-kig-player]:hover .kig-player-name,
+.kig-player[data-kig-player]:focus-visible .kig-player-name {
 	text-decoration: underline;
-	text-decoration-color: rgba(0, 0, 0, 0.18);
+	text-decoration-color: rgba(0, 0, 0, 0.35);
 	text-underline-offset: 3px;
 	text-decoration-thickness: 2px;
 }
 
-[data-theme=dark] .kig-player[data-kig-player] .kig-player-name {
-	text-decoration-color: rgba(255, 255, 255, 0.22);
-}
-
-.kig-player[data-kig-player]:hover .kig-player-name {
-	text-decoration-color: rgba(0, 0, 0, 0.35);
-}
-
-[data-theme=dark] .kig-player[data-kig-player]:hover .kig-player-name {
+[data-theme=dark] .kig-player[data-kig-player]:hover .kig-player-name,
+[data-theme=dark] .kig-player[data-kig-player]:focus-visible .kig-player-name {
 	text-decoration-color: rgba(255, 255, 255, 0.4);
+}
+
+.kig-player[data-kig-player]:focus-visible {
+	outline: 2px solid rgba(247, 179, 42, 0.65);
+	outline-offset: 2px;
 }
 
 .kig-player-mini-avatar {
