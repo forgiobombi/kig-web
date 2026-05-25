@@ -2,6 +2,23 @@
 	display: block;
 }
 
+.kig-player {
+	display: inline-flex;
+	align-items: center;
+	gap: .35rem;
+}
+
+.kig-player-mini-avatar {
+	width: 18px;
+	height: 18px;
+	border-radius: 6px;
+	box-shadow: 0 1px 8px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme=dark] .kig-player-mini-avatar {
+	box-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
+}
+
 .text-outline {
 	display: inline-flex;
 	font-weight: 400;

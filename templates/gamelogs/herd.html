@@ -2,11 +2,26 @@
 {% when HerdDeath with (death) %}
 <i class="align-middle ri-close-line"></i>
 {% if death.has_killer() %}
-<strong style="color: {{death.player()|team_color(player_teams, evt_id)}};">{{ death.player()|player_name(self) }}</strong>
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ death.player()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{death.player()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        death.player()|player_name(self) }}</strong>
+</span>
 was killed by
-<strong style="color: {{death.killer()|team_color(player_teams, evt_id)}};">{{ death.killer()|player_name(self) }}</strong>.
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ death.killer()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{death.killer()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        death.killer()|player_name(self) }}</strong>
+</span>.
 {% else %}
-<strong style="color: {{death.player()|team_color(player_teams, evt_id)}};">{{ death.player()|player_name(self) }}</strong>
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ death.player()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{death.player()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        death.player()|player_name(self) }}</strong>
+</span>
 died.
 {% endif %}
 <span class="badge rounded-pill bg-secondary">{{ death.get_damage_desc() }}</span>

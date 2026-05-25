@@ -1,29 +1,73 @@
 {% match match_evt %}
 {% when CaiCatch with (catch) %}
 <i class="align-middle ri-eye-fill"></i>
-<strong style="color: {{catch.leader()|team_color(player_teams, evt_id)}};">{{ catch.leader()|player_name(self) }}</strong>
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ catch.leader()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{catch.leader()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        catch.leader()|player_name(self) }}</strong>
+</span>
 was caught by
-<strong style="color: {{catch.carrier()|team_color(player_teams, evt_id)}};">{{ catch.carrier()|player_name(self) }}</strong>.
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ catch.carrier()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{catch.carrier()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        catch.carrier()|player_name(self) }}</strong>
+</span>.
 {% when CaiEscape with (escape) %}
 <i class="align-middle ri-{% if escape.has_saver() %}shield-star-fill{% else %}eye-off-fill{% endif %}"></i>
-<strong style="color: {{escape.leader()|team_color(player_teams, evt_id)}};">{{ escape.leader()|player_name(self) }}</strong>
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ escape.leader()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{escape.leader()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        escape.leader()|player_name(self) }}</strong>
+</span>
 escaped.
 <span class="badge rounded-pill bg-primary">{% if escape.has_saver() %}Saved by
-    <strong>{{ escape.saver()|player_name(self) }}</strong>{% else if escape.has_chance() %}Rolled
+    <span class="kig-player">
+        <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ escape.saver()|player_uuid(self) }}"
+            height="18" width="18">
+        <strong class="kig-player-name">{{ escape.saver()|player_name(self) }}</strong>
+    </span>{% else if escape.has_chance() %}Rolled
     {{ "{:.1}"|format(escape.chance()) }}%{% endif %}</span>
 {% when CaiCapture with (capture) %}
 <i class="align-middle ri-star-fill"></i>
-<strong style="color: {{capture.leader()|team_color(player_teams, evt_id)}};">{{ capture.leader()|player_name(self) }}</strong>
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ capture.leader()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{capture.leader()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        capture.leader()|player_name(self) }}</strong>
+</span>
 was captured by
-<strong style="color: {{capture.carrier()|team_color(player_teams, evt_id)}};">{{ capture.carrier()|player_name(self) }}</strong>.
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ capture.carrier()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{capture.carrier()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        capture.carrier()|player_name(self) }}</strong>
+</span>.
 {% when CaiDeath with (death) %}
 <i class="align-middle ri-close-line"></i>
 {% if death.has_killer() %}
-<strong style="color: {{death.player()|team_color(player_teams, evt_id)}};">{{ death.player()|player_name(self) }}</strong>
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ death.player()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{death.player()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        death.player()|player_name(self) }}</strong>
+</span>
 was killed by
-<strong style="color: {{death.killer()|team_color(player_teams, evt_id)}};">{{ death.killer()|player_name(self) }}</strong>.
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ death.killer()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{death.killer()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        death.killer()|player_name(self) }}</strong>
+</span>.
 {% else %}
-<strong style="color: {{death.player()|team_color(player_teams, evt_id)}};">{{ death.player()|player_name(self) }}</strong>
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ death.player()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{death.player()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        death.player()|player_name(self) }}</strong>
+</span>
 died.
 {% endif %}
 <span class="badge rounded-pill bg-secondary">{{ death.cause().get_damage_desc() }}</span>

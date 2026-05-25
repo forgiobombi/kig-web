@@ -5,8 +5,12 @@
 {% let team = t|team_from_idx(teams) %}
 Team <strong style="color: {{team.color}};">{{ team.name }}</strong>'s bed was destroyed
 {%- if bed_destroy.has_player() %}
-by <strong style="color: {{bed_destroy.player()|team_color(player_teams, evt_id)}};">{{ bed_destroy.player()|player_name(self)
-    }}</strong>
+by <span class="kig-player">
+    <img class="kig-player-mini-avatar" alt=""
+        src="https://crafthead.net/helm/{{ bed_destroy.player()|player_uuid(self) }}" height="18" width="18">
+    <strong style="color: {{bed_destroy.player()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        bed_destroy.player()|player_name(self) }}</strong>
+</span>
 {%- endif -%}.
 {% else %}
 {% endmatch %}

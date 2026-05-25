@@ -4,16 +4,31 @@
 Round started on <strong>{{ round.floor() }}</strong>.
 {% when BpPowerup with (powerup) %}
 <i class="align-middle ri-star-fill"></i>
-<strong>{{ powerup.name()|player_name(self) }}</strong> collected the <strong>{{ powerup.powerUp() }}</strong> powerup.
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ powerup.name()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong class="kig-player-name">{{ powerup.name()|player_name(self) }}</strong>
+</span> collected the <strong>{{ powerup.powerUp() }}</strong> powerup.
 {% when BpWinners with (winners) %}
 <i class="align-middle ri-medal-fill"></i>
-Winners: <strong>{{ winners.winner|player_names(self) }}</strong>
+Winners:
+{% for winner in winners.winner -%}
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ winner|player_uuid(self) }}"
+        height="18" width="18">
+    <strong class="kig-player-name">{{ winner|player_name(self) }}</strong>
+</span>{% if !loop.last -%},&nbsp;{%- endif %}
+{%- endfor %}
 {% when BpDeath with (death) %}
 {% let players = death.player.as_slice() %}
 <i class="align-middle ri-close-line"></i>
 {% for eliminated in players -%}
-<strong data-bs-toggle="tooltip" data-bs-placement="top" title="{{ eliminated.get_damage_desc() }}">{{-
-    eliminated.name()|player_name(self) -}}</strong>{% if !loop.last -%},&nbsp;{%- endif %}
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt=""
+        src="https://crafthead.net/helm/{{ eliminated.name()|player_uuid(self) }}" height="18" width="18">
+    <strong data-bs-toggle="tooltip" data-bs-placement="top" title="{{ eliminated.get_damage_desc() }}"
+        class="kig-player-name">{{- eliminated.name()|player_name(self) -}}</strong>
+</span>{% if !loop.last -%},&nbsp;{%- endif %}
 {%- endfor %}
 
 {% if death.player.len() == 1 %} was {% else %} were {% endif %}

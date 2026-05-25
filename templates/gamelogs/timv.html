@@ -1,29 +1,64 @@
 {% match match_evt %}
 {% when TimvTest with (test) %}
 <i class="align-middle ri-eye-fill"></i>
-<strong style="color: {{test.player()|team_color(player_teams, evt_id)}};">{{ test.player()|player_name(self) }}</strong>
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ test.player()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{test.player()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        test.player()|player_name(self) }}</strong>
+</span>
 tested.
 {% if test.spoofed() %}
 <span class="badge rounded-pill bg-primary">Spoofed</span>
 {% endif %}
 {% when TimvTrap with (trap) %}
-<strong style="color: {{trap.player()|team_color(player_teams, evt_id)}};">{{ trap.player()|player_name(self) }}</strong>
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ trap.player()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{trap.player()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        trap.player()|player_name(self) }}</strong>
+</span>
 activated a
 traitor trap.
 {% when TimvBody with (body) %}
 <i class="ri-search-eye-fill"></i>
-<strong style="color: {{body.player()|team_color(player_teams, evt_id)}};">{{ body.player()|player_name(self) }}</strong>'s body
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ body.player()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{body.player()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        body.player()|player_name(self) }}</strong>
+</span>'s body
 was found
 by
-<strong style="color: {{body.identifier()|team_color(player_teams, evt_id)}};">{{ body.identifier()|player_name(self) }}</strong>.
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ body.identifier()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{body.identifier()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        body.identifier()|player_name(self) }}</strong>
+</span>.
 {% when TimvDeath with (death) %}
 <i class="align-middle ri-close-line"></i>
 {% if death.has_killer() %}
-<strong style="color: {{death.player()|team_color(player_teams, evt_id)}};">{{ death.player()|player_name(self) }}</strong>
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ death.player()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{death.player()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        death.player()|player_name(self) }}</strong>
+</span>
 was killed by
-<strong style="color: {{death.killer()|team_color(player_teams, evt_id)}};">{{ death.killer()|player_name(self) }}</strong>.
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ death.killer()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{death.killer()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        death.killer()|player_name(self) }}</strong>
+</span>.
 {% else %}
-<strong style="color: {{death.player()|team_color(player_teams, evt_id)}};">{{ death.player()|player_name(self) }}</strong>
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ death.player()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{death.player()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        death.player()|player_name(self) }}</strong>
+</span>
 died.
 {% endif %}
 <span class="badge rounded-pill bg-secondary">{{ death.get_damage_desc() }}</span>
@@ -32,23 +67,46 @@ died.
 {% endif %}
 {% when TimvDetectiveBody with (detective) %}
 <i class="ri-search-eye-fill"></i>
-<strong style="color: {{detective.player()|team_color(player_teams, evt_id)}};">{{ detective.player()|player_name(self)
-    }}</strong>'s body
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt=""
+        src="https://crafthead.net/helm/{{ detective.player()|player_uuid(self) }}" height="18" width="18">
+    <strong style="color: {{detective.player()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        detective.player()|player_name(self) }}</strong>
+</span>'s body
 was
 inspected
 by
-<strong style="color: {{detective.identifier()|team_color(player_teams, evt_id)}};">{{ detective.identifier()|player_name(self)
-    }}</strong>.
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt=""
+        src="https://crafthead.net/helm/{{ detective.identifier()|player_uuid(self) }}" height="18" width="18">
+    <strong style="color: {{detective.identifier()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        detective.identifier()|player_name(self) }}</strong>
+</span>.
 {% when TimvPsychicReport with (psychic) %}
 <i class="ri-psychotherapy-fill"></i>
-<strong style="color: {{psychic.psychic()|team_color(player_teams, evt_id)}};">{{ psychic.psychic()|player_name(self) }}</strong>
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ psychic.psychic()|player_uuid(self) }}"
+        height="18" width="18">
+    <strong style="color: {{psychic.psychic()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        psychic.psychic()|player_name(self) }}</strong>
+</span>
 (Psychic) received
-the report: <strong>{{ psychic.reported|player_names(self) }}</strong>
+the report:
+{% for reported in psychic.reported -%}
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ reported|player_uuid(self) }}"
+        height="18" width="18">
+    <strong class="kig-player-name">{{ reported|player_name(self) }}</strong>
+</span>{% if !loop.last -%},&nbsp;{%- endif %}
+{%- endfor %}
 {% when TimvSharedPurchase with (shared_purchase) %}
 <i class="ri-shopping-basket-fill"></i>
-<strong style="color: {{shared_purchase.purchaser()|team_color(player_teams, evt_id)}};">{{
-    shared_purchase.purchaser()|player_name(self)
-    }}</strong>
+<span class="kig-player">
+    <img class="kig-player-mini-avatar" alt=""
+        src="https://crafthead.net/helm/{{ shared_purchase.purchaser()|player_uuid(self) }}" height="18" width="18">
+    <strong style="color: {{shared_purchase.purchaser()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
+        shared_purchase.purchaser()|player_name(self) }}</strong>
+</span>
 bought <strong>{{ shared_purchase.item() }}</strong>
 {% when TimvRampageGoal with (rampage_goal) %}
 {% let t = rampage_goal.team() %}

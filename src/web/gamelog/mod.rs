@@ -22,7 +22,7 @@ use crate::{
     AppState,
 };
 use actix_web::{
-    http::header::{ContentType, HeaderValue},
+    http::header::ContentType,
     web, HttpResponse,
 };
 use askama::Template;
@@ -53,6 +53,7 @@ lazy_static::lazy_static! {
       color: mc_to_rgb('7')
     };
 }
+static ANON_UUID: &str = "c06f8906-4c8a-4911-9c29-ea1dbd1aab82";
 static DEFAULT_COLORS: [char; 2] = ['c', 'e'];
 
 #[derive(Template)]
@@ -72,6 +73,8 @@ struct GamelogTemplate<'a> {
     current_year: String,
     nicks_hidden: bool,
     player_display_names: HashMap<String, String>,
+    player_uuids: HashMap<String, String>,
+    player_nicks: HashMap<String, String>,
 }
 
 // Extensions - each mode can implement its own version
@@ -285,6 +288,16 @@ fn render_gamelog(
         .flat_map(|t| t.players.iter())
         .map(|p| (p.name.to_string(), p.nick.unwrap_or(p.name).to_string()))
         .collect();
+    let player_uuids = teams
+        .iter()
+        .flat_map(|t| t.players.iter())
+        .map(|p| (p.name.to_string(), p.uuid.to_string()))
+        .collect();
+    let player_nicks = teams
+        .iter()
+        .flat_map(|t| t.players.iter())
+        .filter_map(|p| p.nick.map(|nick| (p.name.to_string(), nick.to_string())))
+        .collect();
 
     let current_time = get_current_time();
     let nicks_hidden = if log.has_nick_embargo() && log.nick_embargo() > 0 && log.has_game_start()
@@ -317,6 +330,8 @@ fn render_gamelog(
         current_year: current_time.year().to_string(),
         nicks_hidden,
         player_display_names,
+        player_uuids,
+        player_nicks,
     }
     .render()
     .unwrap();
@@ -557,15 +572,15 @@ mod filters {
             .unwrap_or(player))
     }
 
-    pub fn player_names<'a>(
-        players: impl IntoIterator<Item = &'a String>,
-        log: &'a GamelogTemplate,
-    ) -> askama::Result<String> {
-        let to_join = players
-            .into_iter()
-            .map(|p| player_name(p, log))
-            .collect::<askama::Result<Vec<&str>>>()?;
-        Ok(to_join.join(", "))
+    pub fn player_uuid(player: &str, log: &GamelogTemplate) -> askama::Result<String> {
+        if log.nicks_hidden && log.player_nicks.contains_key(player) {
+            return Ok(super::ANON_UUID.to_string());
+        }
+        Ok(log
+            .player_uuids
+            .get(player)
+            .cloned()
+            .unwrap_or_else(|| super::ANON_UUID.to_string()))
     }
 
     pub fn team_from_idx<'a>(idx: &'a i32, teams: &'a [Team<'a>]) -> askama::Result<&'a Team<'a>> {
