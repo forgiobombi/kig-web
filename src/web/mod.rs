@@ -22,7 +22,9 @@ use time::OffsetDateTime;
 mod gamelog;
 
 pub fn add_routes() -> Scope {
-    web::scope("/")
+    // NOTE: Actix scopes concatenate paths literally; using "/" here would produce "//demo/{mode}".
+    // An empty scope keeps routes at the root ("/demo/{mode}", "/game/{mode}/{id}").
+    web::scope("")
         .route("/game/{mode}/{id}", web::get().to(gamelog::gamelog_by_id))
         .route("/demo/{mode}", web::get().to(gamelog::demo_gamelog))
 }
