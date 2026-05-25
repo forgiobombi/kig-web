@@ -48,7 +48,7 @@ impl GameLogExtension for GravExtension {
         false
     }
 
-    fn get_map<'slf, 'log: 'slf>(&'slf self, _log: &'log GameLog) -> Cow<str> {
+    fn get_map<'slf, 'log: 'slf>(&'slf self, _log: &'log GameLog) -> Cow<'slf, str> {
         Cow::Owned(self.stages.join(", "))
     }
 }

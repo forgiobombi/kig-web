@@ -22,7 +22,7 @@ use crate::{
     AppState,
 };
 use actix_web::{
-    http::header::{ContentType, IntoHeaderValue},
+    http::header::{ContentType, HeaderValue},
     web, HttpResponse,
 };
 use askama::Template;
@@ -85,7 +85,7 @@ pub trait GameLogExtension {
     fn supports_score(&self) -> bool {
         true
     }
-    fn get_map<'slf, 'log: 'slf>(&'slf self, log: &'log GameLog) -> Cow<str> {
+    fn get_map<'slf, 'log: 'slf>(&'slf self, log: &'log GameLog) -> Cow<'slf, str> {
         Cow::Borrowed(log.map())
     }
 }
@@ -189,24 +189,44 @@ async fn get_log(
 
 pub async fn gamelog_by_id(
     state: web::Data<AppState>,
-    web::Path((mut mode, path_id)): web::Path<(String, String)>,
+    path: web::Path<(String, String)>,
 ) -> Result<HttpResponse> {
+    let (mut mode, path_id) = path.into_inner();
+
     match base62::decode(&path_id) {
         Ok(id) => {
             mode.make_ascii_uppercase();
-            let mode = GameMode::from_str(&mode).map_err(|_| crate::error::Error::ModeNotFound)?;
-            let (log, meta) = get_log(state, mode, id.to_be_bytes()[2..].to_vec()).await?;
+
+            let mode = GameMode::from_str(&mode)
+                .map_err(|_| crate::error::Error::ModeNotFound)?;
+
+            let (log, meta) =
+                get_log(state, mode, id.to_be_bytes()[2..].to_vec()).await?;
+
             render_gamelog(mode, &path_id, &log, meta.server)
         }
         Err(_) => Ok(HttpResponse::BadRequest().body("Invalid game ID")),
     }
 }
 
-pub async fn demo_gamelog(web::Path(mut mode): web::Path<String>) -> Result<HttpResponse> {
+pub async fn demo_gamelog(
+    path: web::Path<String>,
+) -> Result<HttpResponse> {
+    let mut mode = path.into_inner();
+
     mode.make_ascii_uppercase();
-    let mode = GameMode::from_str(&mode).map_err(|_| crate::error::Error::ModeNotFound)?;
+
+    let mode = GameMode::from_str(&mode)
+        .map_err(|_| crate::error::Error::ModeNotFound)?;
+
     let log = demo::build_demo_log(mode);
-    render_gamelog(mode, "DEMO", &log, Some(String::from("Demo server")))
+
+    render_gamelog(
+        mode,
+        "DEMO",
+        &log,
+        Some(String::from("Demo server")),
+    )
 }
 
 fn render_gamelog(
@@ -301,7 +321,7 @@ fn render_gamelog(
     .render()
     .unwrap();
     Ok(HttpResponse::Ok()
-        .content_type(IntoHeaderValue::try_into(ContentType::html()).unwrap())
+        .content_type(ContentType::html())
         .body(render))
 }
 
@@ -315,7 +335,7 @@ impl Functions {
         }
     }
 
-    fn get_map<'slf, 'log: 'slf>(&'slf self, log: &'log GameLog) -> Cow<str> {
+    fn get_map<'slf, 'log: 'slf>(&'slf self, log: &'log GameLog) -> Cow<'slf, str> {
         self.extension.get_map(log)
     }
 }

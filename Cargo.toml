@@ -21,9 +21,9 @@ lazy_static = "1"
 # Web server
 askama = "0.10"
 askama_derive = "0.10"
-actix-web = "3"
+actix-web = "4"
 cached = { version = "0.56", features = ["async"] }
-actix-files = "0.5"
+actix-files = "0.6"
 
 # Misc
 strum = "0.20"

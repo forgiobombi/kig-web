@@ -15,7 +15,7 @@
 
 use std::fmt::Display;
 
-use actix_web::{dev::Body, http::StatusCode, HttpResponse, ResponseError};
+use actix_web::{body::BoxBody, http::StatusCode, web::Bytes, HttpResponse, ResponseError};
 use mongodb::bson::document::ValueAccessError;
 use protobuf::Error as ProtobufError;
 
@@ -45,14 +45,14 @@ impl ResponseError for Error {
     }
 
     fn error_response(&self) -> actix_web::HttpResponse {
-        HttpResponse::new(self.status_code()).set_body(Body::from_slice(
-            match self {
-                Error::NotFound => "Not found",
-                Error::ModeNotFound => "Mode not found",
-                _ => "Internal error. Please contact the server's administrators.",
-            }
-            .as_bytes(),
-        ))
+        let msg = match self {
+            Error::NotFound => "Not found",
+            Error::ModeNotFound => "Mode not found",
+            _ => "Internal error. Please contact the server's administrators.",
+        };
+
+        HttpResponse::new(self.status_code())
+            .set_body(BoxBody::new(Bytes::copy_from_slice(msg.as_bytes())))
     }
 }
 

@@ -32,17 +32,18 @@ pub struct AppState {
 
 #[actix_web::main]
 async fn main() -> io::Result<()> {
-    let port = std::env::var("KIG_PORT").unwrap_or_else(|_| String::from("3233"));
-    let host = std::env::var("KIG_HOST").unwrap_or_else(|_| String::from("127.0.0.1"));
+    let port = std::env::var("KIG_PORT").unwrap_or_else(|_| "3233".to_string());
+    let host = std::env::var("KIG_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
 
-    // Application state
     let db = Arc::new(DbHandle::new().await.unwrap());
     let state = AppState { db };
+
+    println!("Server running at http://{}:{}", host, port);
 
     HttpServer::new(move || {
         App::new()
             .wrap(middleware::Compress::default())
-            .data(state.clone())
+            .app_data(actix_web::web::Data::new(state.clone()))
             .service(web::static_files())
             .service(web::static_files_fallback())
             .service(web::images())
