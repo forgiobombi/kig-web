@@ -9,7 +9,8 @@ edition = "2018"
 tokio = { version = "1", features = ["full"] }
 
 # Database
-mongodb = { version = "2", default-features = false, features = ["tokio-runtime"] }
+# >= 3.2.5 includes a TLS certificate validation fix.
+mongodb = { version = "3.2.5", default-features = false, features = ["rustls-tls", "bson-2", "compat-3-3-0"] }
 serde = {version = "1", features = ["derive"]}
 
 # Gamelogs
