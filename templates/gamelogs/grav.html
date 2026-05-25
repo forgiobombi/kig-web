@@ -1,7 +1,9 @@
 {% match match_evt %}
 {% when GravStageCompletion with (stage_completion) %}
 <i class="align-middle ri-play-circle-fill"></i>
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ stage_completion.player()|player_key(self) }}"
+    data-kig-uuid="{{ stage_completion.player()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}"
+    tabindex="0">
     <img class="kig-player-mini-avatar" alt=""
         src="https://crafthead.net/helm/{{ stage_completion.player()|player_uuid(self) }}" height="18" width="18">
     <strong class="kig-player-name">{{ stage_completion.player()|player_name(self) }}</strong>
@@ -14,14 +16,17 @@
 {% endif %}
 {% when GravGameFinish with (game_finish) %}
 <i class="align-middle ri-star-fill"></i>
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ game_finish.player()|player_key(self) }}"
+    data-kig-uuid="{{ game_finish.player()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
     <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ game_finish.player()|player_uuid(self) }}"
         height="18" width="18">
     <strong class="kig-player-name">{{ game_finish.player()|player_name(self) }}</strong>
 </span> finished <strong>#{{ game_finish.place() }}</strong> in <strong>{{ game_finish.time()|grav_format_time}}</strong>.
 {% when GravHardcoreFail with (hardcore_fail) %}
 <i class="align-middle ri-close-line"></i>
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ hardcore_fail.player()|player_key(self) }}"
+    data-kig-uuid="{{ hardcore_fail.player()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}"
+    tabindex="0">
     <img class="kig-player-mini-avatar" alt=""
         src="https://crafthead.net/helm/{{ hardcore_fail.player()|player_uuid(self) }}" height="18" width="18">
     <strong class="kig-player-name">{{ hardcore_fail.player()|player_name(self) }}</strong>

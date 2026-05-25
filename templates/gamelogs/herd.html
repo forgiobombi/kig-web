@@ -2,21 +2,24 @@
 {% when HerdDeath with (death) %}
 <i class="align-middle ri-close-line"></i>
 {% if death.has_killer() %}
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ death.player()|player_key(self) }}"
+    data-kig-uuid="{{ death.player()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
     <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ death.player()|player_uuid(self) }}"
         height="18" width="18">
     <strong style="color: {{death.player()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
         death.player()|player_name(self) }}</strong>
 </span>
 was killed by
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ death.killer()|player_key(self) }}"
+    data-kig-uuid="{{ death.killer()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
     <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ death.killer()|player_uuid(self) }}"
         height="18" width="18">
     <strong style="color: {{death.killer()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
         death.killer()|player_name(self) }}</strong>
 </span>.
 {% else %}
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ death.player()|player_key(self) }}"
+    data-kig-uuid="{{ death.player()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
     <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ death.player()|player_uuid(self) }}"
         height="18" width="18">
     <strong style="color: {{death.player()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{

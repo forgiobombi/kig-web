@@ -1,14 +1,16 @@
 {% match match_evt %}
 {% when CaiCatch with (catch) %}
 <i class="align-middle ri-eye-fill"></i>
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ catch.leader()|player_key(self) }}"
+    data-kig-uuid="{{ catch.leader()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
     <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ catch.leader()|player_uuid(self) }}"
         height="18" width="18">
     <strong style="color: {{catch.leader()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
         catch.leader()|player_name(self) }}</strong>
 </span>
 was caught by
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ catch.carrier()|player_key(self) }}"
+    data-kig-uuid="{{ catch.carrier()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
     <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ catch.carrier()|player_uuid(self) }}"
         height="18" width="18">
     <strong style="color: {{catch.carrier()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
@@ -16,7 +18,8 @@ was caught by
 </span>.
 {% when CaiEscape with (escape) %}
 <i class="align-middle ri-{% if escape.has_saver() %}shield-star-fill{% else %}eye-off-fill{% endif %}"></i>
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ escape.leader()|player_key(self) }}"
+    data-kig-uuid="{{ escape.leader()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
     <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ escape.leader()|player_uuid(self) }}"
         height="18" width="18">
     <strong style="color: {{escape.leader()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
@@ -24,7 +27,8 @@ was caught by
 </span>
 escaped.
 <span class="badge rounded-pill bg-primary">{% if escape.has_saver() %}Saved by
-    <span class="kig-player">
+    <span class="kig-player" data-kig-player="{{ escape.saver()|player_key(self) }}"
+        data-kig-uuid="{{ escape.saver()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
         <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ escape.saver()|player_uuid(self) }}"
             height="18" width="18">
         <strong class="kig-player-name">{{ escape.saver()|player_name(self) }}</strong>
@@ -32,14 +36,16 @@ escaped.
     {{ "{:.1}"|format(escape.chance()) }}%{% endif %}</span>
 {% when CaiCapture with (capture) %}
 <i class="align-middle ri-star-fill"></i>
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ capture.leader()|player_key(self) }}"
+    data-kig-uuid="{{ capture.leader()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
     <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ capture.leader()|player_uuid(self) }}"
         height="18" width="18">
     <strong style="color: {{capture.leader()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
         capture.leader()|player_name(self) }}</strong>
 </span>
 was captured by
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ capture.carrier()|player_key(self) }}"
+    data-kig-uuid="{{ capture.carrier()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
     <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ capture.carrier()|player_uuid(self) }}"
         height="18" width="18">
     <strong style="color: {{capture.carrier()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
@@ -48,21 +54,24 @@ was captured by
 {% when CaiDeath with (death) %}
 <i class="align-middle ri-close-line"></i>
 {% if death.has_killer() %}
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ death.player()|player_key(self) }}"
+    data-kig-uuid="{{ death.player()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
     <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ death.player()|player_uuid(self) }}"
         height="18" width="18">
     <strong style="color: {{death.player()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
         death.player()|player_name(self) }}</strong>
 </span>
 was killed by
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ death.killer()|player_key(self) }}"
+    data-kig-uuid="{{ death.killer()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
     <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ death.killer()|player_uuid(self) }}"
         height="18" width="18">
     <strong style="color: {{death.killer()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{
         death.killer()|player_name(self) }}</strong>
 </span>.
 {% else %}
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ death.player()|player_key(self) }}"
+    data-kig-uuid="{{ death.player()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
     <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ death.player()|player_uuid(self) }}"
         height="18" width="18">
     <strong style="color: {{death.player()|team_color(player_teams, evt_id)}};" class="kig-player-name">{{

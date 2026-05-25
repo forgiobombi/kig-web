@@ -4,7 +4,8 @@
 Round started on <strong>{{ round.floor() }}</strong>.
 {% when BpPowerup with (powerup) %}
 <i class="align-middle ri-star-fill"></i>
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ powerup.name()|player_key(self) }}"
+    data-kig-uuid="{{ powerup.name()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
     <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ powerup.name()|player_uuid(self) }}"
         height="18" width="18">
     <strong class="kig-player-name">{{ powerup.name()|player_name(self) }}</strong>
@@ -13,7 +14,8 @@ Round started on <strong>{{ round.floor() }}</strong>.
 <i class="align-middle ri-medal-fill"></i>
 Winners:
 {% for winner in winners.winner -%}
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ winner|player_key(self) }}" data-kig-uuid="{{ winner|player_uuid(self) }}"
+    data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
     <img class="kig-player-mini-avatar" alt="" src="https://crafthead.net/helm/{{ winner|player_uuid(self) }}"
         height="18" width="18">
     <strong class="kig-player-name">{{ winner|player_name(self) }}</strong>
@@ -23,7 +25,8 @@ Winners:
 {% let players = death.player.as_slice() %}
 <i class="align-middle ri-close-line"></i>
 {% for eliminated in players -%}
-<span class="kig-player">
+<span class="kig-player" data-kig-player="{{ eliminated.name()|player_key(self) }}"
+    data-kig-uuid="{{ eliminated.name()|player_uuid(self) }}" data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
     <img class="kig-player-mini-avatar" alt=""
         src="https://crafthead.net/helm/{{ eliminated.name()|player_uuid(self) }}" height="18" width="18">
     <strong data-bs-toggle="tooltip" data-bs-placement="top" title="{{ eliminated.get_damage_desc() }}"
