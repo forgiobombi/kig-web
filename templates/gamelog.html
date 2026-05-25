@@ -30,8 +30,6 @@
 <div class="row g-3 align-items-stretch">
     <div class="col-12 col-lg-4 col-xl-3">
         <div class="card w-100 h-100">
-            <img src="/game-img/maps/{{ mode.get_database_id() }}/{{ map|map_file_name }}.png" class="card-img-top"
-                alt="Map thumbnail">
             <div class="card-body">
                 <h5 class="card-title text-center">{{ map }}</h5>
                 <p class="card-text text-center"><small class="text-muted">
@@ -170,8 +168,15 @@
                                 style="background-color: {{color}} !important;">{{ name }}</span>
                             {% when ChatChannel::None %}
                             {% endmatch %}
-                            <span style="color: {{chat.sender()|team_color(player_teams, evt_id)}};"><strong>{{
-                                    chat.sender()|player_name(self) }}</strong></span>:
+                            <span class="kig-player" data-kig-player="{{ chat.sender()|player_key(self) }}"
+                                data-kig-uuid="{{ chat.sender()|player_uuid(self) }}"
+                                data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
+                                <img class="kig-player-mini-avatar" alt=""
+                                    src="https://crafthead.net/helm/{{ chat.sender()|player_uuid(self) }}" height="18"
+                                    width="18">
+                                <strong style="color: {{chat.sender()|team_color(player_teams, evt_id)}};"
+                                    class="kig-player-name">{{ chat.sender()|player_name(self) }}</strong>
+                            </span>:
                             {{ chat.message() }}
                             {% let count = chat.count() %}
                             {% if count > 1 %}
@@ -181,13 +186,26 @@
                             {% let jt = join.team() %}
                             {% let team = jt|team_from_idx(teams) %}
                             <i class="align-middle ri-user-add-fill"></i>
-                            <strong>{{ join.player()|player_name(self) }}</strong> joined the <strong
-                                style="color: {{team.color}};">{{ team.name }}</strong>
+                            <span class="kig-player" data-kig-player="{{ join.player()|player_key(self) }}"
+                                data-kig-uuid="{{ join.player()|player_uuid(self) }}"
+                                data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
+                                <img class="kig-player-mini-avatar" alt=""
+                                    src="https://crafthead.net/helm/{{ join.player()|player_uuid(self) }}" height="18"
+                                    width="18">
+                                <strong class="kig-player-name">{{ join.player()|player_name(self) }}</strong>
+                            </span> joined the <strong style="color: {{team.color}};">{{ team.name }}</strong>
                             team.
                             {% when Leave with (leave) %}
                             <i class="align-middle ri-user-unfollow-fill"></i>
-                            <strong style="color: {{leave.player()|team_color(player_teams, evt_id)}};">{{
-                                leave.player()|player_name(self) }}</strong> left.
+                            <span class="kig-player" data-kig-player="{{ leave.player()|player_key(self) }}"
+                                data-kig-uuid="{{ leave.player()|player_uuid(self) }}"
+                                data-kig-mode="{{ mode.get_database_id() }}" tabindex="0">
+                                <img class="kig-player-mini-avatar" alt=""
+                                    src="https://crafthead.net/helm/{{ leave.player()|player_uuid(self) }}" height="18"
+                                    width="18">
+                                <strong style="color: {{leave.player()|team_color(player_teams, evt_id)}};"
+                                    class="kig-player-name">{{ leave.player()|player_name(self) }}</strong>
+                            </span> left.
                             {% else %}
                             {% include "gamelogs/herd.html" %}
                             {% match mode %}
@@ -223,5 +241,6 @@
 {% endblock %}
 
 {% block scripts %}
+<script id="kig-player-stats" type="application/json">{{ player_stats_json|safe }}</script>
 <script type="text/javascript" src="/game-static/js/gamelog.js"></script>
 {% endblock %}

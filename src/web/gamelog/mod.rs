@@ -22,7 +22,7 @@ use crate::{
     AppState,
 };
 use actix_web::{
-    http::header::{ContentType, HeaderValue},
+    http::header::ContentType,
     web, HttpResponse,
 };
 use askama::Template;
@@ -30,6 +30,7 @@ use cached::{proc_macro::cached, TimedCache};
 use event::EventType::{self, *};
 use gamelog::{BukkitDamageCause, ChatEvent, GameEvent};
 use regex::Regex;
+use serde::Serialize;
 use std::{borrow::Cow, str::FromStr};
 use std::{collections::HashMap, convert::TryInto, fmt, time::Duration};
 use time::UtcDateTime;
@@ -53,6 +54,7 @@ lazy_static::lazy_static! {
       color: mc_to_rgb('7')
     };
 }
+static ANON_UUID: &str = "c06f8906-4c8a-4911-9c29-ea1dbd1aab82";
 static DEFAULT_COLORS: [char; 2] = ['c', 'e'];
 
 #[derive(Template)]
@@ -72,6 +74,9 @@ struct GamelogTemplate<'a> {
     current_year: String,
     nicks_hidden: bool,
     player_display_names: HashMap<String, String>,
+    player_uuids: HashMap<String, String>,
+    player_nicks: HashMap<String, String>,
+    player_stats_json: String,
 }
 
 // Extensions - each mode can implement its own version
@@ -168,6 +173,16 @@ enum ChatChannel<'a> {
 }
 
 pub struct PlayerTeamMap<'a>(HashMap<&'a str, Vec<(usize, &'a Team<'a>)>>);
+
+#[derive(Default, Serialize)]
+struct PlayerStats {
+    kills: u32,
+    deaths: u32,
+    joins: u32,
+    leaves: u32,
+    messages: u32,
+    extra: HashMap<String, u32>,
+}
 
 #[cached(
     ty = "TimedCache<(Vec<u8>, GameMode), (GameLog, GameLogMeta)>",
@@ -285,6 +300,16 @@ fn render_gamelog(
         .flat_map(|t| t.players.iter())
         .map(|p| (p.name.to_string(), p.nick.unwrap_or(p.name).to_string()))
         .collect();
+    let player_uuids = teams
+        .iter()
+        .flat_map(|t| t.players.iter())
+        .map(|p| (p.name.to_string(), p.uuid.to_string()))
+        .collect();
+    let player_nicks = teams
+        .iter()
+        .flat_map(|t| t.players.iter())
+        .filter_map(|p| p.nick.map(|nick| (p.name.to_string(), nick.to_string())))
+        .collect();
 
     let current_time = get_current_time();
     let nicks_hidden = if log.has_nick_embargo() && log.nick_embargo() > 0 && log.has_game_start()
@@ -295,6 +320,8 @@ fn render_gamelog(
     } else {
         false
     };
+
+    let player_stats_json = build_player_stats_json(&events, nicks_hidden, &player_nicks);
 
     let render = GamelogTemplate {
         log,
@@ -317,12 +344,207 @@ fn render_gamelog(
         current_year: current_time.year().to_string(),
         nicks_hidden,
         player_display_names,
+        player_uuids,
+        player_nicks,
+        player_stats_json,
     }
     .render()
     .unwrap();
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
         .body(render))
+}
+
+fn build_player_stats_json(
+    events: &[WrappedEvent],
+    nicks_hidden: bool,
+    player_nicks: &HashMap<String, String>,
+) -> String {
+    fn stats_key(player: &str, nicks_hidden: bool, player_nicks: &HashMap<String, String>) -> String {
+        if nicks_hidden {
+            player_nicks
+                .get(player)
+                .cloned()
+                .unwrap_or_else(|| player.to_string())
+        } else {
+            player.to_string()
+        }
+    }
+
+    fn bump(extra: &mut HashMap<String, u32>, key: &str) {
+        *extra.entry(key.to_string()).or_insert(0) += 1;
+    }
+
+    let mut stats: HashMap<String, PlayerStats> = HashMap::new();
+
+    for wrapped in events {
+        match &wrapped.event {
+            EventType::Chat(chat) => {
+                let key = stats_key(chat.sender(), nicks_hidden, player_nicks);
+                stats.entry(key).or_default().messages += 1;
+            }
+            EventType::Join(join) => {
+                let key = stats_key(join.player(), nicks_hidden, player_nicks);
+                stats.entry(key).or_default().joins += 1;
+            }
+            EventType::Leave(leave) => {
+                let key = stats_key(leave.player(), nicks_hidden, player_nicks);
+                stats.entry(key).or_default().leaves += 1;
+            }
+            EventType::CaiDeath(death) => {
+                let victim_key = stats_key(death.player(), nicks_hidden, player_nicks);
+                stats.entry(victim_key).or_default().deaths += 1;
+                if death.has_killer() {
+                    let killer_key = stats_key(death.killer(), nicks_hidden, player_nicks);
+                    stats.entry(killer_key).or_default().kills += 1;
+                }
+            }
+            EventType::CaiCatch(catch) => {
+                let leader_key = stats_key(catch.leader(), nicks_hidden, player_nicks);
+                bump(&mut stats.entry(leader_key).or_default().extra, "Caught");
+                let carrier_key = stats_key(catch.carrier(), nicks_hidden, player_nicks);
+                bump(
+                    &mut stats.entry(carrier_key).or_default().extra,
+                    "Catches",
+                );
+            }
+            EventType::CaiCapture(capture) => {
+                let leader_key = stats_key(capture.leader(), nicks_hidden, player_nicks);
+                bump(
+                    &mut stats.entry(leader_key).or_default().extra,
+                    "Captured",
+                );
+                let carrier_key = stats_key(capture.carrier(), nicks_hidden, player_nicks);
+                bump(
+                    &mut stats.entry(carrier_key).or_default().extra,
+                    "Captures",
+                );
+            }
+            EventType::CaiEscape(escape) => {
+                let leader_key = stats_key(escape.leader(), nicks_hidden, player_nicks);
+                bump(
+                    &mut stats.entry(leader_key).or_default().extra,
+                    "Escapes",
+                );
+                if escape.has_saver() {
+                    let saver_key = stats_key(escape.saver(), nicks_hidden, player_nicks);
+                    bump(&mut stats.entry(saver_key).or_default().extra, "Saves");
+                }
+            }
+            EventType::TimvDeath(death) => {
+                let victim_key = stats_key(death.player(), nicks_hidden, player_nicks);
+                stats.entry(victim_key).or_default().deaths += 1;
+                if death.has_killer() {
+                    let killer_key = stats_key(death.killer(), nicks_hidden, player_nicks);
+                    stats.entry(killer_key).or_default().kills += 1;
+                }
+            }
+            EventType::TimvTest(test) => {
+                let player_key = stats_key(test.player(), nicks_hidden, player_nicks);
+                bump(&mut stats.entry(player_key).or_default().extra, "Tests");
+            }
+            EventType::TimvTrap(trap) => {
+                let player_key = stats_key(trap.player(), nicks_hidden, player_nicks);
+                bump(&mut stats.entry(player_key).or_default().extra, "Traps");
+            }
+            EventType::TimvBody(body) => {
+                let identifier_key = stats_key(body.identifier(), nicks_hidden, player_nicks);
+                bump(
+                    &mut stats.entry(identifier_key).or_default().extra,
+                    "Bodies Found",
+                );
+            }
+            EventType::TimvDetectiveBody(det) => {
+                let identifier_key = stats_key(det.identifier(), nicks_hidden, player_nicks);
+                bump(
+                    &mut stats.entry(identifier_key).or_default().extra,
+                    "Inspections",
+                );
+            }
+            EventType::TimvPsychicReport(report) => {
+                let psychic_key = stats_key(report.psychic(), nicks_hidden, player_nicks);
+                bump(
+                    &mut stats.entry(psychic_key).or_default().extra,
+                    "Reports",
+                );
+            }
+            EventType::TimvSharedPurchase(purchase) => {
+                let purchaser_key = stats_key(purchase.purchaser(), nicks_hidden, player_nicks);
+                bump(
+                    &mut stats.entry(purchaser_key).or_default().extra,
+                    "Purchases",
+                );
+            }
+            EventType::BpPowerup(powerup) => {
+                let player_key = stats_key(powerup.name(), nicks_hidden, player_nicks);
+                bump(&mut stats.entry(player_key).or_default().extra, "Powerups");
+            }
+            EventType::BpDeath(death) => {
+                for eliminated in &death.player {
+                    let player_key = stats_key(eliminated.name(), nicks_hidden, player_nicks);
+                    stats.entry(player_key).or_default().deaths += 1;
+                }
+            }
+            EventType::GravStageCompletion(stage) => {
+                let player_key = stats_key(stage.player(), nicks_hidden, player_nicks);
+                bump(&mut stats.entry(player_key).or_default().extra, "Stages");
+            }
+            EventType::GravGameFinish(finish) => {
+                let player_key = stats_key(finish.player(), nicks_hidden, player_nicks);
+                bump(&mut stats.entry(player_key).or_default().extra, "Finishes");
+            }
+            EventType::GravHardcoreFail(fail) => {
+                let player_key = stats_key(fail.player(), nicks_hidden, player_nicks);
+                stats.entry(player_key.clone()).or_default().deaths += 1;
+                bump(
+                    &mut stats.entry(player_key).or_default().extra,
+                    "Hardcore Deaths",
+                );
+            }
+            EventType::BedBedDestruction(bed) => {
+                if bed.has_player() {
+                    let player_key = stats_key(bed.player(), nicks_hidden, player_nicks);
+                    bump(
+                        &mut stats.entry(player_key).or_default().extra,
+                        "Beds Broken",
+                    );
+                }
+            }
+            EventType::HerdDeath(death) => {
+                let victim_key = stats_key(death.player(), nicks_hidden, player_nicks);
+                stats.entry(victim_key.clone()).or_default().deaths += 1;
+                if death.has_killer() {
+                    let killer_key = stats_key(death.killer(), nicks_hidden, player_nicks);
+                    stats.entry(killer_key).or_default().kills += 1;
+                }
+                if !death.respawn() {
+                    bump(
+                        &mut stats.entry(victim_key).or_default().extra,
+                        "Final Deaths",
+                    );
+                }
+            }
+            EventType::HalloweenDeath(death) => {
+                let victim_key = stats_key(death.player(), nicks_hidden, player_nicks);
+                stats.entry(victim_key).or_default().deaths += 1;
+                if death.has_killer() {
+                    let killer_key = stats_key(death.killer(), nicks_hidden, player_nicks);
+                    stats.entry(killer_key).or_default().kills += 1;
+                }
+            }
+            EventType::TurfDeath(death) => {
+                let victim_key = stats_key(death.player(), nicks_hidden, player_nicks);
+                stats.entry(victim_key).or_default().deaths += 1;
+                if death.has_killer() {
+                    let killer_key = stats_key(death.killer(), nicks_hidden, player_nicks);
+                    stats.entry(killer_key).or_default().kills += 1;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    serde_json::to_string(&stats).unwrap_or_else(|_| "{}".to_string())
 }
 
 impl Functions {
@@ -557,15 +779,27 @@ mod filters {
             .unwrap_or(player))
     }
 
-    pub fn player_names<'a>(
-        players: impl IntoIterator<Item = &'a String>,
-        log: &'a GamelogTemplate,
-    ) -> askama::Result<String> {
-        let to_join = players
-            .into_iter()
-            .map(|p| player_name(p, log))
-            .collect::<askama::Result<Vec<&str>>>()?;
-        Ok(to_join.join(", "))
+    pub fn player_uuid(player: &str, log: &GamelogTemplate) -> askama::Result<String> {
+        if log.nicks_hidden && log.player_nicks.contains_key(player) {
+            return Ok(super::ANON_UUID.to_string());
+        }
+        Ok(log
+            .player_uuids
+            .get(player)
+            .cloned()
+            .unwrap_or_else(|| super::ANON_UUID.to_string()))
+    }
+
+    pub fn player_key(player: &str, log: &GamelogTemplate) -> askama::Result<String> {
+        if log.nicks_hidden {
+            Ok(log
+                .player_nicks
+                .get(player)
+                .cloned()
+                .unwrap_or_else(|| player.to_string()))
+        } else {
+            Ok(player.to_string())
+        }
     }
 
     pub fn team_from_idx<'a>(idx: &'a i32, teams: &'a [Team<'a>]) -> askama::Result<&'a Team<'a>> {
