@@ -1,0 +1,101 @@
+:root {
+  --kig-radius: 16px;
+  --kig-radius-sm: 12px;
+  --kig-border: rgba(0, 0, 0, 0.1);
+  --kig-bg: #f5f5f7;
+  --kig-surface: rgba(255, 255, 255, 0.75);
+  --kig-surface-solid: #ffffff;
+  --kig-text: #1d1d1f;
+  --kig-muted: rgba(29, 29, 31, 0.66);
+  --kig-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --kig-shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+body {
+  background: var(--kig-bg);
+  color: var(--kig-text);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body,
+.card,
+.accordion-item,
+.list-group-item {
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease;
+}
+
+/* Sticky / glassy header */
+.kig-header {
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+  background: var(--kig-surface);
+  backdrop-filter: saturate(180%) blur(16px);
+}
+
+/* Make surfaces feel "Apple-like" */
+.card,
+.accordion-item {
+  border-radius: var(--kig-radius);
+  border-color: var(--kig-border) !important;
+  box-shadow: var(--kig-shadow-sm);
+}
+
+.card:hover {
+  box-shadow: var(--kig-shadow);
+}
+
+.card-img-top {
+  border-top-left-radius: var(--kig-radius);
+  border-top-right-radius: var(--kig-radius);
+}
+
+.list-group-item {
+  border-color: var(--kig-border);
+}
+
+.accordion-button {
+  border-radius: var(--kig-radius-sm) !important;
+}
+
+.accordion-button:not(.collapsed) {
+  box-shadow: none;
+}
+
+.kig-link {
+  color: inherit;
+  text-decoration-color: rgba(0, 0, 0, 0.25);
+}
+
+.kig-link:hover {
+  text-decoration-color: rgba(0, 0, 0, 0.45);
+}
+
+/* Dark theme overrides (bootstrap-dark + our extras) */
+[data-theme="dark"] {
+  --kig-border: rgba(255, 255, 255, 0.12);
+  --kig-bg: #0b0b0f;
+  --kig-surface: rgba(18, 18, 22, 0.72);
+  --kig-surface-solid: #121216;
+  --kig-text: #f5f5f7;
+  --kig-muted: rgba(245, 245, 247, 0.66);
+  --kig-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --kig-shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.28);
+}
+
+[data-theme="dark"] .kig-link {
+  text-decoration-color: rgba(255, 255, 255, 0.25);
+}
+
+[data-theme="dark"] .kig-link:hover {
+  text-decoration-color: rgba(255, 255, 255, 0.45);
+}
+
+/* Tweak bootstrap muted text readability in dark mode */
+[data-theme="dark"] .text-muted {
+  color: var(--kig-muted) !important;
+}
+
